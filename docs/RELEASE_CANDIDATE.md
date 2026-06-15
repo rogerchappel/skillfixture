@@ -22,3 +22,9 @@ npm run check
 npm run smoke
 npm run validate
 ```
+
+## Reviewer Checklist
+
+- Confirm dry-run output is deterministic JSON.
+- Confirm write mode only creates files inside the requested output directory.
+- Confirm generated prompts do not include private data before committing fixture packs.
