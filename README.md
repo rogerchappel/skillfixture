@@ -32,3 +32,15 @@ Dry-run mode performs local reads only. Write mode creates files in the requeste
 ## Limitations
 
 The first version extracts fenced blocks and simple example lists. Richer conventions can be added without changing the fixture schema.
+
+## Verification
+
+```bash
+npm run check
+npm test
+npm run smoke
+npm run package:smoke
+npm run release:check
+```
+
+Use `npm run release:check` before publishing or opening a release PR.
