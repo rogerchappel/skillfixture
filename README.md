@@ -44,3 +44,5 @@ npm run release:check
 ```
 
 Use `npm run release:check` before publishing or opening a release PR.
+See [docs/release-readiness.md](docs/release-readiness.md) for the package
+surface, release gate, and reviewer checklist.
