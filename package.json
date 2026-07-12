@@ -9,7 +9,7 @@
   "scripts": {
     "test": "node --test",
     "check": "node --check src/index.js && node --check bin/skillfixture.js",
-    "smoke": "node bin/skillfixture.js test/fixtures/source/SKILL.md --dry-run",
+    "smoke": "node bin/skillfixture.js --help && node bin/skillfixture.js --version && node bin/skillfixture.js test/fixtures/source/SKILL.md --dry-run",
     "validate": "bash scripts/validate.sh",
     "package:smoke": "node scripts/package-smoke.js",
     "release:check": "npm run check && npm test && npm run smoke && npm run package:smoke",
