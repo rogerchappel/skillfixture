@@ -7,6 +7,7 @@
 ```bash
 npm install
 npm test
+node bin/skillfixture.js --version
 node bin/skillfixture.js SKILL.md --dry-run
 node bin/skillfixture.js SKILL.md --out test/fixtures/generated
 ```

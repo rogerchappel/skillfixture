@@ -4,6 +4,13 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { buildFixturePack } from "../src/index.js";
 
+async function version() {
+  const packageJson = JSON.parse(
+    await readFile(new URL("../package.json", import.meta.url), "utf8")
+  );
+  return packageJson.version;
+}
+
 function usage() {
   return [
     "Usage: skillfixture <SKILL.md> [--out fixtures/skill] [--dry-run]",
@@ -29,6 +36,9 @@ async function main(argv) {
       dryRun = true;
     } else if (arg === "--help" || arg === "-h") {
       console.log(usage());
+      return 0;
+    } else if (arg === "--version" || arg === "-v") {
+      console.log(await version());
       return 0;
     } else if (!sourcePath) {
       sourcePath = arg;
