@@ -24,6 +24,14 @@ test("falls back to fenced blocks when no examples heading exists", () => {
   assert.deepEqual(pack.cases[0].expected, ["language:text", "manual-review"]);
 });
 
+test("extracts fenced examples from CRLF markdown", () => {
+  const markdown = "# Windows Skill\r\n\r\n## Examples\r\n\r\n```text\r\nCheck the repo\r\n```\r\n";
+  const pack = buildFixturePack(markdown);
+  assert.equal(pack.cases.length, 1);
+  assert.equal(pack.cases[0].prompt, "Check the repo");
+  assert.deepEqual(pack.cases[0].expected, ["language:text", "manual-review"]);
+});
+
 test("CLI dry-run prints fixture JSON", async () => {
   const { stdout } = await execFileAsync("node", [
     "bin/skillfixture.js",

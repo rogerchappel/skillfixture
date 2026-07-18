@@ -49,7 +49,7 @@ function extractExamples(markdown) {
 
 function extractFencedBlocks(markdown) {
   const blocks = [];
-  const pattern = /```(\w+)?\n([\s\S]*?)```/g;
+  const pattern = /```(\w+)?\r?\n([\s\S]*?)```/g;
   let match;
   while ((match = pattern.exec(markdown)) !== null) {
     blocks.push({
