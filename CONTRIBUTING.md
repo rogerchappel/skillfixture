@@ -5,6 +5,7 @@ Thanks for improving skillfixture.
 Before opening a pull request, run:
 
 ```bash
+npm ci
 npm run release:check
 ```
 

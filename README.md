@@ -5,7 +5,7 @@
 ## Quickstart
 
 ```bash
-npm install
+npm ci
 npm test
 node bin/skillfixture.js --version
 node bin/skillfixture.js SKILL.md --dry-run
@@ -17,6 +17,10 @@ Generated packs contain:
 - `manifest.json` with source, skill name, case count, and checksum.
 - `cases.json` with prompt cases and expected review markers.
 - One prompt text file per case.
+
+Regenerating into the same directory removes prompt files represented by the
+previous `cases.json` when those cases no longer exist. Other files in the
+directory are left untouched.
 
 ## Library API
 
@@ -37,6 +41,7 @@ The first version extracts fenced blocks and simple example lists. Richer conven
 ## Verification
 
 ```bash
+npm ci
 npm run check
 npm test
 npm run smoke

@@ -13,6 +13,7 @@ Use this checklist before publishing, tagging, or asking reviewers to trust a
 
 ## Verification Commands
 
+- `npm ci`: performs the lockfile-backed clean install used by CI.
 - `npm run check`: syntax-checks the CLI and library.
 - `npm test`: runs fixture-backed Node tests.
 - `npm run smoke`: exercises the CLI against the source fixture skill.
