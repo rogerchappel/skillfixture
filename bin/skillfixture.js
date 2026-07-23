@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, unlink, writeFile } from "node:fs/promises";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { buildFixturePack } from "../src/index.js";
@@ -17,6 +17,37 @@ function usage() {
     "",
     "Extracts examples and fenced blocks from a skill into deterministic fixtures."
   ].join("\n");
+}
+
+async function removeObsoletePromptFiles(outDir, nextFiles) {
+  let previousCases;
+  try {
+    previousCases = JSON.parse(await readFile(join(outDir, "cases.json"), "utf8"));
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return;
+    }
+    throw error;
+  }
+
+  if (!Array.isArray(previousCases)) {
+    throw new Error(`Existing ${join(outDir, "cases.json")} must contain an array`);
+  }
+
+  const nextNames = new Set(nextFiles.map((file) => file.name));
+  const obsoleteNames = previousCases
+    .map((testCase) => `${testCase.id}.prompt.txt`)
+    .filter((name) => /^case-\d+\.prompt\.txt$/.test(name) && !nextNames.has(name));
+
+  await Promise.all(obsoleteNames.map(async (name) => {
+    try {
+      await unlink(join(outDir, name));
+    } catch (error) {
+      if (error.code !== "ENOENT") {
+        throw error;
+      }
+    }
+  }));
 }
 
 async function main(argv) {
@@ -61,6 +92,7 @@ async function main(argv) {
   }
 
   await mkdir(outDir, { recursive: true });
+  await removeObsoletePromptFiles(outDir, pack.files);
   await writeFile(join(outDir, "manifest.json"), `${JSON.stringify(pack.manifest, null, 2)}\n`);
   await writeFile(join(outDir, "cases.json"), `${JSON.stringify(pack.cases, null, 2)}\n`);
 
