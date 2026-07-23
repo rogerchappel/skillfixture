@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { execFile } from "node:child_process";
@@ -57,6 +57,30 @@ test("CLI writes fixture pack files", async () => {
     assert.equal(manifest.caseCount, 2);
     assert.equal(cases.length, 2);
     assert.match(prompt, /Prepare a company brief/);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("CLI removes obsolete generated prompts when a fixture pack shrinks", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "skillfixture-"));
+  const source = join(dir, "SKILL.md");
+  const outDir = join(dir, "generated");
+  try {
+    await writeFile(source, "# Demo\n\n## Examples\n\n- First prompt\n- Second prompt\n");
+    await execFileAsync("node", ["bin/skillfixture.js", source, "--out", outDir]);
+    await writeFile(join(outDir, "review-notes.txt"), "keep me\n");
+
+    await writeFile(source, "# Demo\n\n## Examples\n\n- First prompt\n");
+    await execFileAsync("node", ["bin/skillfixture.js", source, "--out", outDir]);
+
+    assert.deepEqual((await readdir(outDir)).sort(), [
+      "case-01.prompt.txt",
+      "cases.json",
+      "manifest.json",
+      "review-notes.txt"
+    ]);
+    assert.equal(await readFile(join(outDir, "review-notes.txt"), "utf8"), "keep me\n");
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
