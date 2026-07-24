@@ -32,6 +32,42 @@ test("extracts fenced examples from CRLF markdown", () => {
   assert.deepEqual(pack.cases[0].expected, ["language:text", "manual-review"]);
 });
 
+test("strips ordered-list markers from plain examples", () => {
+  const markdown = [
+    "# Ordered Skill",
+    "",
+    "## Examples",
+    "",
+    "1. First prompt",
+    "12)   Second prompt"
+  ].join("\n");
+  const pack = buildFixturePack(markdown);
+
+  assert.deepEqual(pack.cases.map(({ prompt }) => prompt), [
+    "First prompt",
+    "Second prompt"
+  ]);
+});
+
+test("strips unordered-list markers from plain examples", () => {
+  const markdown = [
+    "# Unordered Skill",
+    "",
+    "## Examples",
+    "",
+    "- First prompt",
+    "*  Second prompt",
+    "+   Third prompt"
+  ].join("\n");
+  const pack = buildFixturePack(markdown);
+
+  assert.deepEqual(pack.cases.map(({ prompt }) => prompt), [
+    "First prompt",
+    "Second prompt",
+    "Third prompt"
+  ]);
+});
+
 test("CLI dry-run prints fixture JSON", async () => {
   const { stdout } = await execFileAsync("node", [
     "bin/skillfixture.js",
