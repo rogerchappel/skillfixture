@@ -42,7 +42,7 @@ function extractExamples(markdown) {
 
   return section[1]
     .split(/\n+/)
-    .map((line) => line.replace(/^[-*]\s+/, "").trim())
+    .map((line) => line.replace(/^(?:[-*+]|\d{1,9}[.)])\s+/, "").trim())
     .filter(Boolean)
     .map((prompt) => ({ prompt, expected: ["manual-review"] }));
 }
