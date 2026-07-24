@@ -36,7 +36,10 @@ Dry-run mode performs local reads only. Write mode creates files in the requeste
 
 ## Limitations
 
-The first version extracts fenced blocks and simple example lists. Richer conventions can be added without changing the fixture schema.
+The first version extracts fenced blocks and simple example lists. Plain lists
+may use `-`, `*`, or `+` unordered markers, or numeric ordered markers such as
+`1.` and `2)`. Richer conventions can be added without changing the fixture
+schema.
 
 ## Verification
 
