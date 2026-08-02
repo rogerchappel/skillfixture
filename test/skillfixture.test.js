@@ -32,6 +32,35 @@ test("extracts fenced examples from CRLF markdown", () => {
   assert.deepEqual(pack.cases[0].expected, ["language:text", "manual-review"]);
 });
 
+test("extracts hyphenated fenced-example info strings", () => {
+  const markdown = "# Shell Skill\n\n## Examples\n\n```shell-session\necho hello\n```\n";
+  const pack = buildFixturePack(markdown);
+
+  assert.equal(pack.cases.length, 1);
+  assert.equal(pack.cases[0].prompt, "echo hello");
+  assert.deepEqual(pack.cases[0].expected, ["language:shell-session", "manual-review"]);
+});
+
+test("extracts tilde-fenced examples with LF and CRLF parity", () => {
+  for (const newline of ["\n", "\r\n"]) {
+    const markdown = [
+      "# Shell Skill",
+      "",
+      "## Examples",
+      "",
+      "~~~bash",
+      "echo hello",
+      "~~~",
+      ""
+    ].join(newline);
+    const pack = buildFixturePack(markdown);
+
+    assert.equal(pack.cases.length, 1);
+    assert.equal(pack.cases[0].prompt, "echo hello");
+    assert.deepEqual(pack.cases[0].expected, ["language:bash", "manual-review"]);
+  }
+});
+
 test("strips ordered-list markers from plain examples", () => {
   const markdown = [
     "# Ordered Skill",
