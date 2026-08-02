@@ -49,14 +49,35 @@ function extractExamples(markdown) {
 
 function extractFencedBlocks(markdown) {
   const blocks = [];
-  const pattern = /```(\w+)?\r?\n([\s\S]*?)```/g;
-  let match;
-  while ((match = pattern.exec(markdown)) !== null) {
+  const lines = markdown.split(/\r?\n/);
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const opening = lines[index].match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
+    if (!opening || (opening[1][0] === "`" && opening[2].includes("`"))) {
+      continue;
+    }
+
+    const marker = opening[1][0];
+    const minimumLength = opening[1].length;
+    const closing = new RegExp(`^ {0,3}${marker}{${minimumLength},}[ \\t]*$`);
+    const body = [];
+    let closingIndex = index + 1;
+    while (closingIndex < lines.length && !closing.test(lines[closingIndex])) {
+      body.push(lines[closingIndex]);
+      closingIndex += 1;
+    }
+    if (closingIndex === lines.length) {
+      continue;
+    }
+
+    const info = opening[2].trim().split(/\s+/, 1)[0];
     blocks.push({
-      language: match[1] || "text",
-      body: match[2].trim()
+      language: info || "text",
+      body: body.join("\n").trim()
     });
+    index = closingIndex;
   }
+
   return blocks;
 }
 
