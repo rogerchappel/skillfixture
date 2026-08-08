@@ -18,6 +18,15 @@ test("builds deterministic cases from skill examples", async () => {
   assert.match(pack.cases[0].prompt, /Prepare a company brief/);
 });
 
+test("package metadata exposes the documented root library API", async () => {
+  const metadata = JSON.parse(
+    await readFile(new URL("../package.json", import.meta.url), "utf8")
+  );
+
+  assert.equal(metadata.type, "module");
+  assert.equal(metadata.exports, "./src/index.js");
+});
+
 test("falls back to fenced blocks when no examples heading exists", () => {
   const pack = buildFixturePack("# Minimal\n\n```text\nCheck the repo\n```");
   assert.equal(pack.cases.length, 1);

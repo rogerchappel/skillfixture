@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Generate deterministic fixture packs from agent skill examples.",
   "type": "module",
+  "exports": "./src/index.js",
   "bin": {
     "skillfixture": "./bin/skillfixture.js"
   },
