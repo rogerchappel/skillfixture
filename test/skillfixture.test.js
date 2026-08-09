@@ -70,6 +70,33 @@ test("extracts tilde-fenced examples with LF and CRLF parity", () => {
   }
 });
 
+test("ignores title and examples headings inside fenced blocks", () => {
+  for (const [fence, info] of [["```", "markdown"], ["~~~", "md"]]) {
+    for (const newline of ["\n", "\r\n"]) {
+      const markdown = [
+        `${fence}${info}`,
+        "# Fenced Title",
+        "## Examples",
+        "- Fenced prompt",
+        fence,
+        "",
+        "# Real Title",
+        "",
+        "## Examples",
+        "",
+        "- Real prompt",
+        ""
+      ].join(newline);
+      const pack = buildFixturePack(markdown);
+
+      assert.equal(pack.manifest.skillName, "Real Title");
+      assert.deepEqual(pack.cases.map(({ prompt }) => prompt), ["Real prompt"]);
+      assert.equal(pack.cases.some(({ prompt }) => prompt === "Fenced Title"), false);
+      assert.equal(pack.cases.some(({ prompt }) => prompt === "Fenced prompt"), false);
+    }
+  }
+});
+
 test("strips ordered-list markers from plain examples", () => {
   const markdown = [
     "# Ordered Skill",
