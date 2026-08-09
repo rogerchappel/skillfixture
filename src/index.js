@@ -25,26 +25,64 @@ export function buildFixturePack(markdown, options = {}) {
 }
 
 function extractTitle(markdown) {
-  const match = markdown.match(/^#\s+(.+)$/m);
-  return match ? match[1].trim() : "untitled-skill";
+  const { headings } = scanHeadings(markdown);
+  const heading = headings.find(({ level }) => level === 1);
+  return heading ? heading.text : "untitled-skill";
 }
 
 function extractExamples(markdown) {
-  const section = markdown.match(/##\s+Examples?\s*\n([\s\S]*?)(?=\n##\s+|\s*$)/i);
-  if (!section) {
+  const { lines, headings } = scanHeadings(markdown);
+  const start = headings.find(
+    ({ level, text }) => level === 2 && /^examples?$/i.test(text)
+  );
+  if (!start) {
     return [];
   }
 
-  const blocks = extractFencedBlocks(section[1]);
+  const end = headings.find(
+    ({ level, index }) => level === 2 && index > start.index
+  );
+  const section = lines.slice(start.index + 1, end?.index).join("\n");
+
+  const blocks = extractFencedBlocks(section);
   if (blocks.length > 0) {
     return blocks.map(blockToCase);
   }
 
-  return section[1]
+  return section
     .split(/\n+/)
     .map((line) => line.replace(/^(?:[-*+]|\d{1,9}[.)])\s+/, "").trim())
     .filter(Boolean)
     .map((prompt) => ({ prompt, expected: ["manual-review"] }));
+}
+
+function scanHeadings(markdown) {
+  const lines = markdown.split(/\r?\n/);
+  const headings = [];
+  let closing = null;
+
+  for (let index = 0; index < lines.length; index += 1) {
+    if (closing) {
+      if (closing.test(lines[index])) {
+        closing = null;
+      }
+      continue;
+    }
+
+    const opening = lines[index].match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
+    if (opening && !(opening[1][0] === "`" && opening[2].includes("`"))) {
+      const marker = opening[1][0];
+      closing = new RegExp(`^ {0,3}${marker}{${opening[1].length},}[ \\t]*$`);
+      continue;
+    }
+
+    const heading = lines[index].match(/^(#{1,2})\s+(.+)$/);
+    if (heading) {
+      headings.push({ index, level: heading[1].length, text: heading[2].trim() });
+    }
+  }
+
+  return { lines, headings };
 }
 
 function extractFencedBlocks(markdown) {
