@@ -45,7 +45,10 @@ Skill titles and `Examples` section headings are only recognized outside valid
 backtick or tilde fences. ATX headings may include an optional closing sequence,
 such as `# Demo Skill #` or `## Examples ##`.
 Heading-like sample text inside a fenced block does not affect document
-structure. Richer conventions can be added without changing the fixture schema.
+structure. An `Examples` section continues through nested headings and ends at
+the next heading of equal or higher rank (for `## Examples`, the next `#` or
+`##` heading). Richer conventions can be added without changing the fixture
+schema.
 
 ## Verification
 
