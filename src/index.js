@@ -78,7 +78,8 @@ function scanHeadings(markdown) {
 
     const heading = lines[index].match(/^(#{1,2})\s+(.+)$/);
     if (heading) {
-      headings.push({ index, level: heading[1].length, text: heading[2].trim() });
+      const text = heading[2].replace(/[ \t]+#+[ \t]*$/, "").trim();
+      headings.push({ index, level: heading[1].length, text });
     }
   }
 
