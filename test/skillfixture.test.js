@@ -150,6 +150,50 @@ test("keeps closing-sequence headings fence-aware", () => {
   assert.deepEqual(pack.cases.map(({ prompt }) => prompt), ["Real prompt"]);
 });
 
+test("ends examples at a following level-1 heading", () => {
+  for (const newline of ["\n", "\r\n"]) {
+    const markdown = [
+      "# Demo Skill",
+      "",
+      "## Examples",
+      "",
+      "- Kept prompt",
+      "",
+      "# Appendix",
+      "",
+      "- Excluded note"
+    ].join(newline);
+    const pack = buildFixturePack(markdown);
+
+    assert.deepEqual(pack.cases.map(({ prompt }) => prompt), ["Kept prompt"]);
+  }
+});
+
+test("keeps nested level-3 content inside examples", () => {
+  const markdown = [
+    "# Demo Skill",
+    "",
+    "## Examples",
+    "",
+    "### Advanced",
+    "",
+    "```text",
+    "Kept nested prompt",
+    "```",
+    "",
+    "## Notes",
+    "",
+    "```text",
+    "Excluded note",
+    "```"
+  ].join("\n");
+  const pack = buildFixturePack(markdown);
+
+  assert.deepEqual(pack.cases.map(({ prompt }) => prompt), [
+    "Kept nested prompt"
+  ]);
+});
+
 test("strips ordered-list markers from plain examples", () => {
   const markdown = [
     "# Ordered Skill",
