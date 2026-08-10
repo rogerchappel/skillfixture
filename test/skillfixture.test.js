@@ -97,6 +97,59 @@ test("ignores title and examples headings inside fenced blocks", () => {
   }
 });
 
+test("normalizes optional closing sequences on ATX headings", () => {
+  const markdown = [
+    "# Demo Skill #",
+    "",
+    "## Examples ##",
+    "",
+    "- Prepare the release notes"
+  ].join("\n");
+  const pack = buildFixturePack(markdown);
+
+  assert.equal(pack.manifest.skillName, "Demo Skill");
+  assert.deepEqual(pack.cases.map(({ prompt }) => prompt), [
+    "Prepare the release notes"
+  ]);
+});
+
+test("preserves hashes that are not valid ATX closing sequences", () => {
+  const markdown = [
+    "# C# Skill#",
+    "",
+    "## Examples # notes",
+    "- Ignored prompt",
+    "",
+    "## Examples",
+    "",
+    "- Kept # prompt"
+  ].join("\n");
+  const pack = buildFixturePack(markdown);
+
+  assert.equal(pack.manifest.skillName, "C# Skill#");
+  assert.deepEqual(pack.cases.map(({ prompt }) => prompt), ["Kept # prompt"]);
+});
+
+test("keeps closing-sequence headings fence-aware", () => {
+  const markdown = [
+    "```markdown",
+    "# Fenced Title #",
+    "## Examples ##",
+    "- Fenced prompt",
+    "```",
+    "",
+    "# Real Title #",
+    "",
+    "## Examples ##",
+    "",
+    "- Real prompt"
+  ].join("\n");
+  const pack = buildFixturePack(markdown);
+
+  assert.equal(pack.manifest.skillName, "Real Title");
+  assert.deepEqual(pack.cases.map(({ prompt }) => prompt), ["Real prompt"]);
+});
+
 test("strips ordered-list markers from plain examples", () => {
   const markdown = [
     "# Ordered Skill",
