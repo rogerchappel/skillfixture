@@ -40,7 +40,7 @@ function extractExamples(markdown) {
   }
 
   const end = headings.find(
-    ({ level, index }) => level === 2 && index > start.index
+    ({ level, index }) => level <= start.level && index > start.index
   );
   const section = lines.slice(start.index + 1, end?.index).join("\n");
 
@@ -100,7 +100,7 @@ function scanHeadings(markdown) {
       continue;
     }
 
-    const heading = lines[index].match(/^(#{1,2})\s+(.+)$/);
+    const heading = lines[index].match(/^(#{1,6})\s+(.+)$/);
     if (heading) {
       const text = heading[2].replace(/[ \t]+#+[ \t]*$/, "").trim();
       headings.push({ index, level: heading[1].length, text });
