@@ -40,9 +40,10 @@ The first version extracts CommonMark-style backtick and tilde fenced blocks,
 using the first word of an optional info string as the language marker. Plain
 lists may use `-`, `*`, or `+` unordered markers, or numeric ordered markers
 such as `1.` and `2)`. Skill titles and `Examples` section headings are only
-recognized outside valid backtick or tilde fences, so heading-like sample text
-inside a fenced block does not affect document structure. Richer conventions
-can be added without changing the fixture schema.
+recognized outside valid backtick or tilde fences. ATX headings may include an
+optional closing sequence, such as `# Demo Skill #` or `## Examples ##`.
+Heading-like sample text inside a fenced block does not affect document
+structure. Richer conventions can be added without changing the fixture schema.
 
 ## Verification
 
