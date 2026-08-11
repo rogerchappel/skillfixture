@@ -49,11 +49,35 @@ function extractExamples(markdown) {
     return blocks.map(blockToCase);
   }
 
-  return section
-    .split(/\n+/)
-    .map((line) => line.replace(/^(?:[-*+]|\d{1,9}[.)])\s+/, "").trim())
-    .filter(Boolean)
-    .map((prompt) => ({ prompt, expected: ["manual-review"] }));
+  return extractPlainList(section).map((prompt) => ({
+    prompt,
+    expected: ["manual-review"]
+  }));
+}
+
+function extractPlainList(markdown) {
+  const items = [];
+  let current = null;
+
+  for (const line of markdown.split(/\r?\n/)) {
+    const item = line.match(/^ {0,3}(?:[-*+]|\d{1,9}[.)])[ \t]+(\S.*)$/);
+    if (item) {
+      current = item[1].trim();
+      items.push(current);
+      continue;
+    }
+
+    const continuation = line.match(/^[ \t]+(\S.*)$/);
+    if (current !== null && continuation) {
+      current = `${current} ${continuation[1].trim()}`;
+      items[items.length - 1] = current;
+      continue;
+    }
+
+    current = null;
+  }
+
+  return items;
 }
 
 function scanHeadings(markdown) {
