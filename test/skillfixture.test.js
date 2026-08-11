@@ -186,6 +186,29 @@ test("strips unordered-list markers from plain examples", () => {
   ]);
 });
 
+test("joins indented plain-list continuations and ignores surrounding prose", () => {
+  for (const newline of ["\n", "\r\n"]) {
+    const markdown = [
+      "# Research Skill",
+      "",
+      "## Examples",
+      "",
+      "Use these examples as starting points:",
+      "- Prepare a company brief",
+      "  including risks and citations.",
+      "2) Compare the leading vendors",
+      "   across pricing and support.",
+      "This section ends with explanatory prose."
+    ].join(newline);
+    const pack = buildFixturePack(markdown);
+
+    assert.deepEqual(pack.cases.map(({ prompt }) => prompt), [
+      "Prepare a company brief including risks and citations.",
+      "Compare the leading vendors across pricing and support."
+    ]);
+  }
+});
+
 test("CLI dry-run prints fixture JSON", async () => {
   const { stdout } = await execFileAsync("node", [
     "bin/skillfixture.js",
@@ -194,6 +217,36 @@ test("CLI dry-run prints fixture JSON", async () => {
   ]);
   const parsed = JSON.parse(stdout);
   assert.equal(parsed.manifest.caseCount, 2);
+});
+
+test("CLI dry-run joins plain-list continuations and excludes prose", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "skillfixture-"));
+  const source = join(dir, "SKILL.md");
+  try {
+    await writeFile(source, [
+      "# Demo",
+      "",
+      "## Examples",
+      "",
+      "Try this workflow:",
+      "+ Inspect the release",
+      "  for missing artifacts.",
+      "Further guidance follows."
+    ].join("\n"));
+
+    const { stdout } = await execFileAsync("node", [
+      "bin/skillfixture.js",
+      source,
+      "--dry-run"
+    ]);
+    const parsed = JSON.parse(stdout);
+
+    assert.deepEqual(parsed.cases.map(({ prompt }) => prompt), [
+      "Inspect the release for missing artifacts."
+    ]);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
 });
 
 test("CLI writes fixture pack files", async () => {
