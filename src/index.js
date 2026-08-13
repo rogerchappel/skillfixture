@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 export function buildFixturePack(markdown, options = {}) {
   const title = extractTitle(markdown);
   const examples = extractExamples(markdown);
-  const blocks = extractFencedBlocks(markdown);
+  const { blocks } = extractFencedBlocks(markdown);
   const cases = examples.length > 0 ? examples : blocks.map(blockToCase);
   const normalizedCases = cases.map((item, index) => normalizeCase(item, index));
   const files = normalizedCases.map((testCase) => ({
@@ -44,12 +44,15 @@ function extractExamples(markdown) {
   );
   const section = lines.slice(start.index + 1, end?.index).join("\n");
 
-  const blocks = extractFencedBlocks(section);
+  const { blocks, unclosedAt } = extractFencedBlocks(section);
   if (blocks.length > 0) {
     return blocks.map(blockToCase);
   }
 
-  return extractPlainList(section).map((prompt) => ({
+  const plainSection = unclosedAt === null
+    ? section
+    : section.split(/\r?\n/).slice(0, unclosedAt).join("\n");
+  return extractPlainList(plainSection).map((prompt) => ({
     prompt,
     expected: ["manual-review"]
   }));
@@ -100,7 +103,7 @@ function scanHeadings(markdown) {
       continue;
     }
 
-    const heading = lines[index].match(/^(#{1,6})\s+(.+)$/);
+    const heading = lines[index].match(/^ {0,3}(#{1,6})\s+(.+)$/);
     if (heading) {
       const text = heading[2].replace(/[ \t]+#+[ \t]*$/, "").trim();
       headings.push({ index, level: heading[1].length, text });
@@ -113,6 +116,7 @@ function scanHeadings(markdown) {
 function extractFencedBlocks(markdown) {
   const blocks = [];
   const lines = markdown.split(/\r?\n/);
+  let unclosedAt = null;
 
   for (let index = 0; index < lines.length; index += 1) {
     const opening = lines[index].match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
@@ -130,7 +134,8 @@ function extractFencedBlocks(markdown) {
       closingIndex += 1;
     }
     if (closingIndex === lines.length) {
-      continue;
+      unclosedAt = index;
+      break;
     }
 
     const info = opening[2].trim().split(/\s+/, 1)[0];
@@ -141,7 +146,7 @@ function extractFencedBlocks(markdown) {
     index = closingIndex;
   }
 
-  return blocks;
+  return { blocks, unclosedAt };
 }
 
 function blockToCase(block) {
