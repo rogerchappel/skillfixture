@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Recognize CommonMark ATX headings indented up to three spaces and keep
+  content after unclosed backtick or tilde fences out of plain-list fixtures.
 - Remove obsolete generated prompt files when regenerating a smaller fixture
   pack while preserving unrelated files in the output directory.
 - Add a package lockfile and use reproducible `npm ci` installs in CI and

@@ -43,12 +43,14 @@ such as `1.` and `2)`. Indented continuation lines are joined to the preceding
 list item; introductory and trailing prose outside the list is not extracted.
 Skill titles and `Examples` section headings are only recognized outside valid
 backtick or tilde fences. ATX headings may include an optional closing sequence,
-such as `# Demo Skill #` or `## Examples ##`.
+such as `# Demo Skill #` or `## Examples ##`, and may be indented by up to
+three spaces. Four-space indentation is treated as code, not a heading.
 Heading-like sample text inside a fenced block does not affect document
-structure. An `Examples` section continues through nested headings and ends at
-the next heading of equal or higher rank (for `## Examples`, the next `#` or
-`##` heading). Richer conventions can be added without changing the fixture
-schema.
+structure. If a fence is not closed, its remaining content is not interpreted
+as plain-list fixtures. An `Examples` section continues through nested headings
+and ends at the next heading of equal or higher rank (for `## Examples`, the
+next `#` or `##` heading). Richer conventions can be added without changing the
+fixture schema.
 
 ## Verification
 
