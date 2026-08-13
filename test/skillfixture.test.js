@@ -113,6 +113,49 @@ test("normalizes optional closing sequences on ATX headings", () => {
   ]);
 });
 
+test("recognizes ATX headings indented up to three spaces", () => {
+  for (const newline of ["\n", "\r\n"]) {
+    const markdown = [
+      "   # Indented Skill",
+      "",
+      "   ## Examples",
+      "",
+      "- Kept prompt"
+    ].join(newline);
+    const pack = buildFixturePack(markdown);
+
+    assert.equal(pack.manifest.skillName, "Indented Skill");
+    assert.deepEqual(pack.cases.map(({ prompt }) => prompt), ["Kept prompt"]);
+
+    const codeIndented = buildFixturePack([
+      "    # Code-block title",
+      "",
+      "    ## Examples",
+      "",
+      "- Not in an examples section"
+    ].join(newline));
+    assert.equal(codeIndented.manifest.skillName, "untitled-skill");
+    assert.equal(codeIndented.manifest.caseCount, 0);
+  }
+});
+
+test("does not extract list items after an unclosed fence", () => {
+  for (const [fence, newline] of [["```text", "\n"], ["~~~text", "\r\n"]]) {
+    const markdown = [
+      "# Demo Skill",
+      "",
+      "## Examples",
+      "",
+      fence,
+      "Fenced sample",
+      "- Not a plain-list fixture"
+    ].join(newline);
+    const pack = buildFixturePack(markdown);
+
+    assert.equal(pack.manifest.caseCount, 0);
+  }
+});
+
 test("preserves hashes that are not valid ATX closing sequences", () => {
   const markdown = [
     "# C# Skill#",
@@ -290,6 +333,63 @@ test("CLI dry-run joins plain-list continuations and excludes prose", async () =
     ]);
   } finally {
     await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("CLI recognizes indented ATX headings with LF and CRLF input", async () => {
+  for (const newline of ["\n", "\r\n"]) {
+    const dir = await mkdtemp(join(tmpdir(), "skillfixture-"));
+    const source = join(dir, "SKILL.md");
+    try {
+      await writeFile(source, [
+        "   # CLI Skill",
+        "",
+        "   ## Examples",
+        "",
+        "- CLI prompt"
+      ].join(newline));
+
+      const { stdout } = await execFileAsync("node", [
+        "bin/skillfixture.js",
+        source,
+        "--dry-run"
+      ]);
+      const parsed = JSON.parse(stdout);
+
+      assert.equal(parsed.manifest.skillName, "CLI Skill");
+      assert.deepEqual(parsed.cases.map(({ prompt }) => prompt), ["CLI prompt"]);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }
+});
+
+test("CLI ignores list items after unclosed fences with LF and CRLF input", async () => {
+  for (const [fence, newline] of [["```text", "\n"], ["~~~text", "\r\n"]]) {
+    const dir = await mkdtemp(join(tmpdir(), "skillfixture-"));
+    const source = join(dir, "SKILL.md");
+    try {
+      await writeFile(source, [
+        "# CLI Skill",
+        "",
+        "## Examples",
+        "",
+        fence,
+        "Fenced sample",
+        "- Not a plain-list fixture"
+      ].join(newline));
+
+      const { stdout } = await execFileAsync("node", [
+        "bin/skillfixture.js",
+        source,
+        "--dry-run"
+      ]);
+      const parsed = JSON.parse(stdout);
+
+      assert.equal(parsed.manifest.caseCount, 0);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
   }
 });
 
