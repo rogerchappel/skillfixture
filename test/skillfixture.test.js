@@ -9,6 +9,18 @@ import { buildFixturePack } from "../src/index.js";
 
 const execFileAsync = promisify(execFile);
 
+async function assertCliUsageError(args, message) {
+  await assert.rejects(
+    execFileAsync("node", ["bin/skillfixture.js", ...args]),
+    (error) => {
+      assert.equal(error.code, 2);
+      assert.equal(error.stdout, "");
+      assert.equal(error.stderr, `skillfixture: ${message}\n`);
+      return true;
+    }
+  );
+}
+
 test("builds deterministic cases from skill examples", async () => {
   const markdown = await readFile(new URL("./fixtures/source/SKILL.md", import.meta.url), "utf8");
   const pack = buildFixturePack(markdown, { sourcePath: "fixture/SKILL.md" });
@@ -304,6 +316,53 @@ test("CLI dry-run prints fixture JSON", async () => {
   ]);
   const parsed = JSON.parse(stdout);
   assert.equal(parsed.manifest.caseCount, 2);
+});
+
+test("CLI accepts documented options before or after the source operand", async () => {
+  for (const args of [
+    ["--dry-run", "test/fixtures/source/SKILL.md"],
+    ["test/fixtures/source/SKILL.md", "--dry-run"]
+  ]) {
+    const { stdout } = await execFileAsync("node", ["bin/skillfixture.js", ...args]);
+    assert.equal(JSON.parse(stdout).manifest.caseCount, 2);
+  }
+});
+
+test("CLI rejects unknown options before treating them as file paths", async () => {
+  await assertCliUsageError(["--bogus"], "Unknown option: --bogus");
+  await assertCliUsageError(
+    ["test/fixtures/source/SKILL.md", "-x"],
+    "Unknown option: -x"
+  );
+});
+
+test("CLI rejects duplicate options", async () => {
+  await assertCliUsageError(
+    ["test/fixtures/source/SKILL.md", "--dry-run", "--dry-run"],
+    "--dry-run may only be specified once"
+  );
+  await assertCliUsageError(
+    ["test/fixtures/source/SKILL.md", "--out", "first", "--out", "second"],
+    "--out may only be specified once"
+  );
+});
+
+test("CLI rejects --out without a directory value", async () => {
+  await assertCliUsageError(
+    ["test/fixtures/source/SKILL.md", "--out"],
+    "--out expects a directory"
+  );
+  await assertCliUsageError(
+    ["test/fixtures/source/SKILL.md", "--out", "--dry-run"],
+    "--out expects a directory"
+  );
+});
+
+test("CLI rejects surplus operands", async () => {
+  await assertCliUsageError(
+    ["test/fixtures/source/SKILL.md", "another.md", "--dry-run"],
+    "Unexpected argument: another.md"
+  );
 });
 
 test("CLI dry-run joins plain-list continuations and excludes prose", async () => {
