@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Reject malformed CLI invocations before reading or writing fixture files.
 - Recognize CommonMark ATX headings indented up to three spaces and keep
   content after unclosed backtick or tilde fences out of plain-list fixtures.
 - Remove obsolete generated prompt files when regenerating a smaller fixture
