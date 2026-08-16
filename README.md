@@ -12,6 +12,10 @@ node bin/skillfixture.js SKILL.md --dry-run
 node bin/skillfixture.js SKILL.md --out test/fixtures/generated
 ```
 
+Options may appear before or after `SKILL.md`. Unknown options, repeated
+`--dry-run` or `--out` options, missing `--out` values, and extra input paths
+are rejected before the CLI reads or writes files.
+
 Generated packs contain:
 
 - `manifest.json` with source, skill name, case count, and checksum.

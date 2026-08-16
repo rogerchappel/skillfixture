@@ -54,28 +54,53 @@ async function main(argv) {
   let sourcePath;
   let outDir = "fixtures/skill";
   let dryRun = false;
+  let outSeen = false;
+  let dryRunSeen = false;
+  let action;
 
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--out") {
+      if (outSeen) {
+        throw new Error("--out may only be specified once");
+      }
+      outSeen = true;
       outDir = argv[index + 1];
       index += 1;
-      if (!outDir) {
+      if (!outDir || outDir.startsWith("-")) {
         throw new Error("--out expects a directory");
       }
     } else if (arg === "--dry-run") {
+      if (dryRunSeen) {
+        throw new Error("--dry-run may only be specified once");
+      }
+      dryRunSeen = true;
       dryRun = true;
     } else if (arg === "--help" || arg === "-h") {
-      console.log(usage());
-      return 0;
+      if (action) {
+        throw new Error(`Unexpected argument: ${arg}`);
+      }
+      action = "help";
     } else if (arg === "--version" || arg === "-v") {
-      console.log(await version());
-      return 0;
+      if (action) {
+        throw new Error(`Unexpected argument: ${arg}`);
+      }
+      action = "version";
+    } else if (arg.startsWith("-")) {
+      throw new Error(`Unknown option: ${arg}`);
     } else if (!sourcePath) {
       sourcePath = arg;
     } else {
       throw new Error(`Unexpected argument: ${arg}`);
     }
+  }
+
+  if (action) {
+    if (sourcePath || outSeen || dryRunSeen) {
+      throw new Error(`Unexpected argument with --${action}`);
+    }
+    console.log(action === "help" ? usage() : await version());
+    return 0;
   }
 
   if (!sourcePath) {
