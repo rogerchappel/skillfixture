@@ -125,6 +125,27 @@ test("normalizes optional closing sequences on ATX headings", () => {
   ]);
 });
 
+test("recognizes setext titles and example sections with LF and CRLF", () => {
+  for (const newline of ["\n", "\r\n"]) {
+    const markdown = [
+      "Demo Skill",
+      "==========",
+      "",
+      "Examples",
+      "--------",
+      "",
+      "- First real example prompt"
+    ].join(newline);
+    const pack = buildFixturePack(markdown);
+
+    assert.equal(pack.manifest.skillName, "Demo Skill");
+    assert.equal(pack.manifest.caseCount, 1);
+    assert.deepEqual(pack.cases.map(({ prompt }) => prompt), [
+      "First real example prompt"
+    ]);
+  }
+});
+
 test("recognizes ATX headings indented up to three spaces", () => {
   for (const newline of ["\n", "\r\n"]) {
     const markdown = [
@@ -316,6 +337,35 @@ test("CLI dry-run prints fixture JSON", async () => {
   ]);
   const parsed = JSON.parse(stdout);
   assert.equal(parsed.manifest.caseCount, 2);
+});
+
+test("CLI dry-run recognizes setext document headings", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "skillfixture-setext-"));
+  const source = join(directory, "SKILL.md");
+  await writeFile(source, [
+    "CLI Setext Skill",
+    "=================",
+    "",
+    "Example",
+    "-------",
+    "",
+    "- Demonstrate the CLI case"
+  ].join("\r\n"));
+
+  try {
+    const { stdout } = await execFileAsync("node", [
+      "bin/skillfixture.js",
+      source,
+      "--dry-run"
+    ]);
+    const parsed = JSON.parse(stdout);
+    assert.equal(parsed.manifest.skillName, "CLI Setext Skill");
+    assert.deepEqual(parsed.cases.map(({ prompt }) => prompt), [
+      "Demonstrate the CLI case"
+    ]);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
 });
 
 test("CLI accepts documented options before or after the source operand", async () => {
