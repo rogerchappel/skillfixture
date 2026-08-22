@@ -42,7 +42,7 @@ function extractExamples(markdown) {
   const end = headings.find(
     ({ level, index }) => level <= start.level && index > start.index
   );
-  const section = lines.slice(start.index + 1, end?.index).join("\n");
+  const section = lines.slice(start.endIndex + 1, end?.index).join("\n");
 
   const { blocks, unclosedAt } = extractFencedBlocks(section);
   if (blocks.length > 0) {
@@ -106,7 +106,20 @@ function scanHeadings(markdown) {
     const heading = lines[index].match(/^ {0,3}(#{1,6})\s+(.+)$/);
     if (heading) {
       const text = heading[2].replace(/[ \t]+#+[ \t]*$/, "").trim();
-      headings.push({ index, level: heading[1].length, text });
+      headings.push({ index, endIndex: index, level: heading[1].length, text });
+      continue;
+    }
+
+    const underline = lines[index + 1]?.match(/^ {0,3}(=+|-+)[ \t]*$/);
+    const text = lines[index].match(/^ {0,3}(\S(?:.*\S)?)[ \t]*$/);
+    if (underline && text) {
+      headings.push({
+        index,
+        endIndex: index + 1,
+        level: underline[1][0] === "=" ? 1 : 2,
+        text: text[1]
+      });
+      index += 1;
     }
   }
 
