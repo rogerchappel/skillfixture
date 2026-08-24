@@ -474,6 +474,54 @@ test("CLI dry-run joins plain-list continuations and excludes prose", async () =
   }
 });
 
+test("CLI only uses document-wide fences when examples heading is absent", async () => {
+  const scenarios = [
+    { section: null, expected: ["Outside example"] },
+    { section: [], expected: [] },
+    {
+      section: ["This section intentionally contains no fixture cases."],
+      expected: []
+    },
+    {
+      section: ["```text", "Unclosed example", "- Not a plain-list fixture"],
+      expected: []
+    }
+  ];
+
+  for (const newline of ["\n", "\r\n"]) {
+    for (const { section, expected } of scenarios) {
+      const dir = await mkdtemp(join(tmpdir(), "skillfixture-scope-"));
+      const source = join(dir, "SKILL.md");
+      const lines = [
+        "# CLI Scoped Skill",
+        "",
+        "```text",
+        "Outside example",
+        "```"
+      ];
+      if (section !== null) {
+        lines.push("", "## Examples", "", ...section);
+      }
+
+      try {
+        await writeFile(source, lines.join(newline));
+        const { stdout } = await execFileAsync("node", [
+          "bin/skillfixture.js",
+          source,
+          "--dry-run"
+        ]);
+        const parsed = JSON.parse(stdout);
+
+        assert.deepEqual(parsed.cases.map(({ prompt }) => prompt), expected);
+        assert.equal(parsed.manifest.caseCount, expected.length);
+        assert.equal(parsed.files.length, expected.length);
+      } finally {
+        await rm(dir, { recursive: true, force: true });
+      }
+    }
+  }
+});
+
 test("CLI recognizes indented ATX headings with LF and CRLF input", async () => {
   for (const newline of ["\n", "\r\n"]) {
     const dir = await mkdtemp(join(tmpdir(), "skillfixture-"));
