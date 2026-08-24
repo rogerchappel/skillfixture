@@ -3,8 +3,9 @@ import { createHash } from "node:crypto";
 export function buildFixturePack(markdown, options = {}) {
   const title = extractTitle(markdown);
   const examples = extractExamples(markdown);
-  const { blocks } = extractFencedBlocks(markdown);
-  const cases = examples.length > 0 ? examples : blocks.map(blockToCase);
+  const cases = examples.found
+    ? examples.cases
+    : extractFencedBlocks(markdown).blocks.map(blockToCase);
   const normalizedCases = cases.map((item, index) => normalizeCase(item, index));
   const files = normalizedCases.map((testCase) => ({
     name: `${testCase.id}.prompt.txt`,
@@ -36,7 +37,7 @@ function extractExamples(markdown) {
     ({ level, text }) => level === 2 && /^examples?$/i.test(text)
   );
   if (!start) {
-    return [];
+    return { found: false, cases: [] };
   }
 
   const end = headings.find(
@@ -46,16 +47,19 @@ function extractExamples(markdown) {
 
   const { blocks, unclosedAt } = extractFencedBlocks(section);
   if (blocks.length > 0) {
-    return blocks.map(blockToCase);
+    return { found: true, cases: blocks.map(blockToCase) };
   }
 
   const plainSection = unclosedAt === null
     ? section
     : section.split(/\r?\n/).slice(0, unclosedAt).join("\n");
-  return extractPlainList(plainSection).map((prompt) => ({
-    prompt,
-    expected: ["manual-review"]
-  }));
+  return {
+    found: true,
+    cases: extractPlainList(plainSection).map((prompt) => ({
+      prompt,
+      expected: ["manual-review"]
+    }))
+  };
 }
 
 function extractPlainList(markdown) {
