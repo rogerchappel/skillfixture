@@ -45,6 +45,35 @@ test("falls back to fenced blocks when no examples heading exists", () => {
   assert.deepEqual(pack.cases[0].expected, ["language:text", "manual-review"]);
 });
 
+test("does not fall back outside a present examples section", () => {
+  const sectionBodies = [
+    [],
+    ["This section intentionally contains no fixture cases."],
+    ["```text", "Unclosed example", "- Not a plain-list fixture"]
+  ];
+
+  for (const newline of ["\n", "\r\n"]) {
+    for (const sectionBody of sectionBodies) {
+      const markdown = [
+        "# Scoped Skill",
+        "",
+        "```text",
+        "Outside before examples",
+        "```",
+        "",
+        "## Examples",
+        "",
+        ...sectionBody
+      ].join(newline);
+      const pack = buildFixturePack(markdown);
+
+      assert.equal(pack.manifest.caseCount, 0);
+      assert.deepEqual(pack.cases, []);
+      assert.deepEqual(pack.files, []);
+    }
+  }
+});
+
 test("extracts fenced examples from CRLF markdown", () => {
   const markdown = "# Windows Skill\r\n\r\n## Examples\r\n\r\n```text\r\nCheck the repo\r\n```\r\n";
   const pack = buildFixturePack(markdown);
