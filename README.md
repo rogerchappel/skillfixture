@@ -56,8 +56,11 @@ Heading-like sample text inside a fenced block does not affect document
 structure. If a fence is not closed, its remaining content is not interpreted
 as plain-list fixtures. An `Examples` section continues through nested headings
 and ends at the next heading of equal or higher rank (for `## Examples`, the
-next `#` or `##` heading). Richer conventions can be added without changing the
-fixture schema.
+next `#` or `##` heading). Document-wide fenced blocks are used only when no
+`Example` or `Examples` section heading exists. A present section that is empty,
+contains prose without list items, or starts an unclosed fence produces zero
+cases instead of importing fences from elsewhere in the document. Richer
+conventions can be added without changing the fixture schema.
 
 ## Verification
 
