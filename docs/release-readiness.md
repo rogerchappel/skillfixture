@@ -22,6 +22,10 @@ Use this checklist before publishing, tagging, or asking reviewers to trust a
   documented package-root import.
 - `npm run release:check`: runs the full release gate used by CI.
 
+CI runs `npm ci` followed by the full release gate on Node.js 18.18.2, the
+declared Node 18 baseline, and Node.js 20. Both matrix jobs must pass before a
+change is release-ready.
+
 ## Reviewer Notes
 
 - Confirm README examples still match the `skillfixture` bin and dry-run/write
