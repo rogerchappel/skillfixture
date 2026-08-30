@@ -156,10 +156,13 @@ function extractFencedBlocks(markdown) {
     }
 
     const info = opening[2].trim().split(/\s+/, 1)[0];
-    blocks.push({
-      language: info || "text",
-      body: body.join("\n").trim()
-    });
+    const content = body.join("\n").trim();
+    if (content) {
+      blocks.push({
+        language: info || "text",
+        body: content
+      });
+    }
     index = closingIndex;
   }
 
