@@ -41,7 +41,10 @@ Dry-run mode performs local reads only. Write mode creates files in the requeste
 ## Limitations
 
 The first version extracts CommonMark-style backtick and tilde fenced blocks,
-using the first word of an optional info string as the language marker. Plain
+using the first word of an optional info string as the language marker. Empty
+or whitespace-only fenced blocks are ignored and do not generate cases or
+prompt files; later non-empty blocks keep their original language markers and
+deterministic case numbering. Plain
 lists may use `-`, `*`, or `+` unordered markers, or numeric ordered markers
 such as `1.` and `2)`. Indented continuation lines are joined to the preceding
 list item; introductory and trailing prose outside the list is not extracted.
