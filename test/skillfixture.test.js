@@ -45,6 +45,24 @@ test("falls back to fenced blocks when no examples heading exists", () => {
   assert.deepEqual(pack.cases[0].expected, ["language:text", "manual-review"]);
 });
 
+test("skips empty fenced examples in sections and document-wide fallback", () => {
+  for (const newline of ["\n", "\r\n"]) {
+    for (const scoped of [false, true]) {
+      const lines = ["# Minimal", ""];
+      if (scoped) lines.push("## Examples", "");
+      lines.push("```text", "   ", "```", "", "~~~shell-session", "echo hello", "~~~");
+      const pack = buildFixturePack(lines.join(newline));
+
+      assert.equal(pack.manifest.caseCount, 1);
+      assert.equal(pack.cases[0].id, "case-01");
+      assert.equal(pack.cases[0].prompt, "echo hello");
+      assert.deepEqual(pack.cases[0].expected, ["language:shell-session", "manual-review"]);
+      assert.equal(pack.cases[0].hash, "40a4976465231164");
+      assert.deepEqual(pack.files, [{ name: "case-01.prompt.txt", content: "echo hello\n" }]);
+    }
+  }
+});
+
 test("does not fall back outside a present examples section", () => {
   const sectionBodies = [
     [],
