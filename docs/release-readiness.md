@@ -22,9 +22,10 @@ Use this checklist before publishing, tagging, or asking reviewers to trust a
   documented package-root import.
 - `npm run release:check`: runs the full release gate used by CI.
 
-CI runs `npm ci` followed by the full release gate on Node.js 18.18.2, the
-declared Node 18 baseline, and Node.js 20. Both matrix jobs must pass before a
-change is release-ready.
+CI runs `npm ci` followed by the full release gate on Node.js 22 and
+Node.js 24, the currently supported LTS runtimes. Both matrix jobs must pass
+before a change is release-ready. The package `engines` floor remains
+`node >=18`, but release readiness is gated on the supported LTS line.
 
 ## Reviewer Notes
 
