@@ -2,8 +2,9 @@
 
 ## Unreleased
 
-- Test the full release gate on Node.js 18.18.2 and Node.js 20 in CI, using the
-  current supported checkout and setup-node action majors.
+- Test the full release gate on Node.js 22 and Node.js 24, the currently
+  supported LTS runtimes, in CI, using the current supported checkout and
+  setup-node action majors.
 - Reject malformed CLI invocations before reading or writing fixture files.
 - Recognize CommonMark ATX headings indented up to three spaces and keep
   content after unclosed backtick or tilde fences out of plain-list fixtures.
