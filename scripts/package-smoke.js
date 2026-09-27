@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, mkdirSync, rmSync } from "node:fs";
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -54,8 +54,22 @@ try {
     { cwd: consumer, stdio: "pipe" }
   );
 
+  const source = join(workspace, "SKILL.md");
+  const outDir = join(workspace, "generated");
+  writeFileSync(source, "# Installed\n\n## Examples\n\n- Verify installed CLI output\n");
+  const cli = join(consumer, "node_modules", ".bin", "skillfixture");
+  execFileSync(process.execPath, [cli, source, "--out", outDir], { stdio: "pipe" });
+  const manifest = JSON.parse(readFileSync(join(outDir, "manifest.json"), "utf8"));
+  const cases = JSON.parse(readFileSync(join(outDir, "cases.json"), "utf8"));
+  if (manifest.caseCount !== 1 || cases.length !== 1) {
+    throw new Error("installed CLI --out did not write the fixture pack");
+  }
+  if (readFileSync(join(outDir, "case-01.prompt.txt"), "utf8") !== "Verify installed CLI output\n") {
+    throw new Error("installed CLI --out wrote unexpected prompt content");
+  }
+
   console.log(
-    `package smoke ok: installed ${pack.filename}, imported root API, and verified ${pack.files.length} files`
+    `package smoke ok: installed ${pack.filename}, imported root API, verified CLI --out, and checked ${pack.files.length} files`
   );
 } catch (error) {
   console.error(`package smoke failed: ${error.message}`);
