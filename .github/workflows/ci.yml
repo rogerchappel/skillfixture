@@ -23,4 +23,5 @@ jobs:
 
     - run: npm ci
 
-    - run: npm test
+    - name: Run release checks
+      run: npm run release:check
