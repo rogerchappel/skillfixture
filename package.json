@@ -9,11 +9,12 @@
   },
   "scripts": {
     "test": "node --test",
+    "coverage": "c8 --all --include=src/**/*.js --reporter=text --reporter=lcov --check-coverage --lines=80 --functions=80 --branches=75 --statements=80 node --test",
     "check": "node --check src/index.js && node --check bin/skillfixture.js",
     "smoke": "node bin/skillfixture.js --help && node bin/skillfixture.js --version && node bin/skillfixture.js test/fixtures/source/SKILL.md --dry-run",
     "validate": "bash scripts/validate.sh",
     "package:smoke": "node scripts/package-smoke.js",
-    "release:check": "npm run check && npm test && npm run smoke && npm run package:smoke",
+    "release:check": "npm run check && npm run coverage && npm run smoke && npm run package:smoke",
     "lint": "npm run check"
   },
   "keywords": [
@@ -46,5 +47,8 @@
     "SECURITY.md",
     "CONTRIBUTING.md",
     "CHANGELOG.md"
-  ]
+  ],
+  "devDependencies": {
+    "c8": "^10.1.3"
+  }
 }

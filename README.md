@@ -7,6 +7,7 @@
 ```bash
 npm ci
 npm test
+npm run coverage
 node bin/skillfixture.js --version
 node bin/skillfixture.js SKILL.md --dry-run
 node bin/skillfixture.js SKILL.md --out test/fixtures/generated
@@ -73,8 +74,14 @@ npm run check
 npm test
 npm run smoke
 npm run package:smoke
+npm run coverage
 npm run release:check
 ```
+
+`npm run coverage` runs the test suite with c8 and enforces minimum coverage of
+80% for lines, functions, and statements, and 75% for branches. The same gate
+runs as part of `npm run release:check`; generated reports are written to
+`coverage/`.
 
 Use `npm run release:check` before publishing or opening a release PR.
 See [docs/release-readiness.md](docs/release-readiness.md) for the package
