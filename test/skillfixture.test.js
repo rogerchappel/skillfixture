@@ -30,6 +30,30 @@ test("builds deterministic cases from skill examples", async () => {
   assert.match(pack.cases[0].prompt, /Prepare a company brief/);
 });
 
+test("expected checks use stable language and manual-review markers", async () => {
+  const markdown = await readFile(new URL("./fixtures/source/SKILL.md", import.meta.url), "utf8");
+  const pack = buildFixturePack(markdown);
+
+  assert.deepEqual(pack.cases.map(({ expected }) => expected), [
+    ["language:text", "manual-review"],
+    ["language:bash", "manual-review"]
+  ]);
+});
+
+test("plain-list fixture cases require manual review without a language marker", () => {
+  const pack = buildFixturePack([
+    "# Demo",
+    "",
+    "## Examples",
+    "",
+    "- Generate a report",
+    "```"
+  ].join("\n"));
+
+  assert.deepEqual(pack.cases[0].expected, ["manual-review"]);
+  assert.equal(pack.cases[0].prompt, "Generate a report");
+});
+
 test("package metadata exposes the documented root library API", async () => {
   const metadata = JSON.parse(
     await readFile(new URL("../package.json", import.meta.url), "utf8")
