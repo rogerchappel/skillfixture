@@ -20,7 +20,10 @@ are rejected before the CLI reads or writes files.
 Generated packs contain:
 
 - `manifest.json` with source, skill name, case count, and checksum.
-- `cases.json` with prompt cases and expected review markers.
+- `cases.json` with prompt cases and expected-check markers. Fenced examples
+  include `language:<info-string>` followed by `manual-review`; plain-list
+  examples include `manual-review` only. These are labels for downstream
+  checks, not claims that an example was executed.
 - One prompt text file per case.
 
 Regenerating into the same directory removes prompt files represented by the
@@ -63,8 +66,10 @@ and ends at the next heading of equal or higher rank (for `## Examples`, the
 next `#` or `##` heading). Document-wide fenced blocks are used only when no
 `Example` or `Examples` section heading exists. A present section that is empty,
 contains prose without list items, or starts an unclosed fence produces zero
-cases instead of importing fences from elsewhere in the document. Richer
-conventions can be added without changing the fixture schema.
+cases instead of importing fences from elsewhere in the document. The expected-check convention is intentionally descriptive: language markers
+identify fenced example types, and `manual-review` signals that generated prompts
+need human or downstream evaluation. Plain-list examples have no language
+marker because their source does not declare one.
 
 ## Verification
 

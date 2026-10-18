@@ -7,4 +7,4 @@
 - [x] Add fixture-backed tests.
 - [x] Document quickstart, API, safety notes, and orchestration.
 - [x] Add validation script.
-- [ ] Add richer expected-check conventions in a later release.
+- [x] Define expected-check markers for fenced and plain-list fixture cases.
